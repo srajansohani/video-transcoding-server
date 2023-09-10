@@ -3,6 +3,7 @@ import multer from 'multer'
 import { exec } from "child_process";
 import fs from 'fs'
 import { resolve } from 'path';
+import cors from 'cors'
 const app = express();
 const port = 3002;
 let inputFilename = "";
@@ -17,7 +18,7 @@ const storage = multer.diskStorage({
   })
 const upload = multer({ storage: storage });
 app.use(express.json());
-
+app.use(cors());
 //Transcoder
 const transcode = (inputFile, resolution)=> {
   return new Promise((resolve, reject) => {
@@ -102,11 +103,7 @@ const uploadProccesedFile= async()=>{
     })
 }
 
-const heavyProcess = async()=>{
-  return new Promise((resolve,reject)=>{
-    setTimeout(()=>{resolve("done")},5000);
-  })
-}
+
 
 app.post('/transcode', upload.single('video'), async(req, res) => {
   console.log(req.file);
@@ -119,7 +116,6 @@ app.post('/transcode', upload.single('video'), async(req, res) => {
 
     
     // Delete the temporary file
-    await heavyProcess();
     await uploadProccesedFile();
     fs.unlink(`uploads/${inputFilename}`,(err)=>{
       if(err)
